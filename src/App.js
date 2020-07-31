@@ -43,11 +43,15 @@ function App() {
         Send
       </Button>
       </FormControl>
-      {
+
+      <div className="notes">
+      { 
         notes.map(note => (
           <Note text={note}/>
         ))
       }
+      </div>
+      
     </div>
   );
 }
