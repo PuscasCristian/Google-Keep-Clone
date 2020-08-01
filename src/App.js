@@ -1,7 +1,9 @@
-import React, {useState} from 'react';
-import {Button, makeStyles, TextField, FormControl, InputLabel, Input} from '@material-ui/core';
+import React, {useState, useEffect} from 'react';
+import {Button, makeStyles, TextField, FormControl } from '@material-ui/core';
 import './App.css';
 import Note from './Note';
+import { db } from "./firebase";
+import firebase from 'firebase';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -21,13 +23,26 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const [input, setInput] = useState('');
-  const [notes, setNotes] = useState(['']);
-  const sendNotes = (event) => {
+  const [notes, setNotes] = useState([]);
+  const sendNote = (event) => {
     event.preventDefault();
     // all the logic to send a message goes here
-    setNotes([...notes, input]);
+    db.collection('notes').add({
+      note: input,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
     setInput(''); 
-  }
+  };
+
+  // useEffect(() => {
+  //   db.collection('notes').onSnapshot(snapshot => {
+  //     // setNotes(snapshot.docs.map(doc => doc.data()));
+  //   })
+  // }, []);
+  db.collection("notes").doc("4Dyv40OAofz0JkBhzjiP")
+    .onSnapshot(function(doc) {
+        console.log("Current data: ", doc.data());
+    });
 
   return (
     <div className="App">
@@ -37,21 +52,21 @@ function App() {
         variant="contained"
         color="primary"
         className={classes.button}
-        onClick={sendNotes}
+        onClick={sendNote}
         disabled={!input}
       >
         Send
       </Button>
       </FormControl>
 
-      <div className="notes">
-      { 
+      <div className="notes"> { 
         notes.map(note => (
-          <Note text={note}/>
+          <p>{note}</p>
+          // <Note text={note}/>
         ))
       }
       </div>
-      
+
     </div>
   );
 }
