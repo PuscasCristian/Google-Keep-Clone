@@ -1,27 +1,26 @@
 import React, {useState, useEffect} from 'react';
-import {Button, makeStyles, TextField, FormControl } from '@material-ui/core';
+import {Button, TextField, FormControl } from '@material-ui/core';
 import './App.css';
 import Note from './Note';
 import { db } from "./firebase";
 import firebase from 'firebase';
 
-const useStyles = makeStyles((theme) => ({
-  button: {
-    margin: theme.spacing(1),
-  },
-  root: {
-    '& .MuiInputBase-root': {
-      margin: theme.spacing(1),
-      width: '500px',
-    },
-  }
+// const useStyles = makeStyles((theme) => ({
+//   button: {
+//     margin: theme.spacing(1),
+//   },
+//   root: {
+//     '& .MuiInputBase-root': {
+//       margin: theme.spacing(1),
+//       width: '500px',
+//     },
+//   }
   
-}));
+// }));
 
 
 
 function App() {
-  const classes = useStyles();
   const [input, setInput] = useState('');
   const [notes, setNotes] = useState([]);
   const sendNote = (event) => {
@@ -34,15 +33,19 @@ function App() {
     setInput(''); 
   };
 
-  // useEffect(() => {
-  //   db.collection('notes').onSnapshot(snapshot => {
-  //     // setNotes(snapshot.docs.map(doc => doc.data()));
-  //   })
-  // }, []);
-  db.collection("notes").doc("4Dyv40OAofz0JkBhzjiP")
-    .onSnapshot(function(doc) {
-        console.log("Current data: ", doc.data());
-    });
+  useEffect(() => {
+    db.collection('notes')
+    .orderBy('timestamp', 'desc' )
+    .onSnapshot(snapshot => {
+      let notes = [];
+      snapshot.forEach(doc => {
+        notes.push({...doc.data(), id: doc.id});
+      });
+      console.log(notes);
+      setNotes(notes);
+    })
+  }, []);
+  notes.map(note => console.log(note));
 
   return (
     <div className="App">
@@ -51,7 +54,7 @@ function App() {
       <Button
         variant="contained"
         color="primary"
-        className={classes.button}
+        className="button-send"
         onClick={sendNote}
         disabled={!input}
       >
@@ -59,12 +62,14 @@ function App() {
       </Button>
       </FormControl>
 
-      <div className="notes"> { 
-        notes.map(note => (
-          <p>{note}</p>
-          // <Note text={note}/>
-        ))
-      }
+
+      <div className="notes"> 
+      { notes && notes.map(note => 
+      (
+        <div className="note" key={note.id}>
+          <Note text={note.note}/>
+        </div>
+      ))}
       </div>
 
     </div>
